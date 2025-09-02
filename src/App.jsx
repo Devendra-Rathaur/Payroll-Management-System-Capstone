@@ -1,0 +1,136 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import LoginPage from "./pages/LoginPage.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import EmployeeDashboard from "./pages/EmployeeDashboard.jsx";
+import Unauthorized from "./pages/Unauthorized.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Layout from "./components/Layout.jsx";
+import SalaryManagement from "./pages/SalaryManagement";
+
+import EmployeeManagement from "./pages/EmployeeManagement.jsx";
+import PayrollManagement from "./pages/PayrollManagement.jsx";
+import Reports from "./pages/Reports.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import LeaveRequest from "./pages/LeaveRequest.jsx";
+import SalarySlip from "./pages/SalarySlip.jsx";
+import MyPayroll from "./pages/MyPayroll.jsx";
+import LeaveApproval from "./pages/LeaveApproval.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route element={<Layout />}>
+          {/* Public */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+
+          {/* Admin */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/admin/salary-management" element={<SalaryManagement />} />
+
+          <Route
+            path="/admin/employees"
+            element={
+              <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                <EmployeeManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/payroll"
+            element={
+              <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                <PayrollManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Employee */}
+          <Route
+            path="/employee/dashboard"
+            element={
+              <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
+                <EmployeeDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/profile"
+            element={
+              <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/leave"
+            element={
+              <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
+                <LeaveRequest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/salary-slip"
+            element={
+              <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
+                <SalarySlip />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/payroll"
+            element={
+              <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
+                <MyPayroll />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/leave-approval"
+            element={<ProtectedRoute roles={['ROLE_ADMIN']}><LeaveApproval /></ProtectedRoute>}
+          />
+
+
+          {/* Default */}
+          <Route index element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Route>
+      </Routes>
+
+      {/* ✅ Toast notifications container (always available) */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+    </Router>
+  );
+}
