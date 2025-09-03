@@ -26,13 +26,10 @@ export default function AdminDashboard() {
             <Link className="list-group-item" to="/admin/employees">
               Employees
             </Link>
-            <span
-              className="list-group-item text-muted"
-              style={{ cursor: "not-allowed" }}
-              title="Departments feature coming soon"
-            >
-              Departments (coming soon)
-            </span>
+            {/* ✅ Changed from disabled span to active link */}
+            <Link className="list-group-item" to="/admin/departments">
+              Departments
+            </Link>
             <Link className="list-group-item" to="/admin/payroll">
               Payroll Runs
             </Link>
@@ -51,9 +48,12 @@ export default function AdminDashboard() {
         {/* Main content */}
         <div className="col-md-9">
           <div className="card p-4 shadow-sm">
-            <h5>Welcome, {user?.role === "ROLE_ADMIN" ? "Admin" : user?.username}</h5>
+            <h5>
+              Welcome, {user?.role === "ROLE_ADMIN" ? "Admin" : user?.username}
+            </h5>
             <p>
-              From here you can manage employees, run payrolls, approve leaves, and view reports.
+              From here you can manage employees, run payrolls, approve leaves,
+              and view reports.
             </p>
             <hr />
             <Outlet />

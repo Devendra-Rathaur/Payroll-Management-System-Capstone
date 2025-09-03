@@ -14,7 +14,7 @@ export default function EmployeeManagement() {
     IT: 4,
     Marketing: 5,
     Operations: 6,
-    Sales: 7
+    Sales: 7,
   };
   const departmentOptions = Object.keys(departmentMap);
 
@@ -28,6 +28,7 @@ export default function EmployeeManagement() {
     lastName: "",
     department: "",
   });
+  const [passwordError, setPasswordError] = useState(""); // ✅ new state
   const [refresh, setRefresh] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
@@ -47,10 +48,15 @@ export default function EmployeeManagement() {
   // Sorting
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
+  // Password regex
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   // Fetch employees
   useEffect(() => {
     setLoading(true);
-    api.get("/employees")
+    api
+      .get("/employees")
       .then((res) => {
         setEmployees(res.data);
         setError("");
@@ -62,14 +68,31 @@ export default function EmployeeManagement() {
   // Create Employee
   async function handleAdd(e) {
     e.preventDefault();
+
+    if (!passwordRegex.test(newEmp.password)) {
+      toast.error(
+        "Password must be at least 8 characters long, include uppercase, lowercase, number, and a special character."
+      );
+      return;
+    }
+
     try {
       await api.post(
-        `/users/create-employee?username=${encodeURIComponent(newEmp.username)}&email=${encodeURIComponent(newEmp.email)}&password=${encodeURIComponent(newEmp.password)}&firstName=${encodeURIComponent(newEmp.firstName)}&lastName=${encodeURIComponent(newEmp.lastName)}&departmentId=${departmentMap[newEmp.department]}`
+        `/users/create-employee?username=${encodeURIComponent(
+          newEmp.username
+        )}&email=${encodeURIComponent(
+          newEmp.email
+        )}&password=${encodeURIComponent(
+          newEmp.password
+        )}&firstName=${encodeURIComponent(
+          newEmp.firstName
+        )}&lastName=${encodeURIComponent(
+          newEmp.lastName
+        )}&departmentId=${departmentMap[newEmp.department]}`
       );
 
       toast.success("✅ Employee created successfully");
 
-      // Reset form
       setNewEmp({
         username: "",
         email: "",
@@ -78,18 +101,21 @@ export default function EmployeeManagement() {
         lastName: "",
         department: "",
       });
+      setPasswordError("");
 
-      // Refresh list so department shows up immediately
       setRefresh(!refresh);
     } catch (err) {
       console.error("Error creating employee:", err.response || err);
-      toast.error(err?.response?.data?.message || "❌ Failed to create employee");
+      toast.error(
+        err?.response?.data?.message || "❌ Failed to create employee"
+      );
     }
   }
 
   // Delete Employee
   async function handleDelete(employeeId, userId) {
-    if (!window.confirm("Are you sure you want to delete this employee?")) return;
+    if (!window.confirm("Are you sure you want to delete this employee?"))
+      return;
     try {
       await api.delete(`/employees/${employeeId}`);
       await api.delete(`/users/${userId}`);
@@ -97,7 +123,9 @@ export default function EmployeeManagement() {
       setRefresh(!refresh);
     } catch (err) {
       console.error("Delete failed:", err.response || err);
-      toast.error(err?.response?.data?.message || "❌ Failed to delete employee/user");
+      toast.error(
+        err?.response?.data?.message || "❌ Failed to delete employee/user"
+      );
     }
   }
 
@@ -129,7 +157,9 @@ export default function EmployeeManagement() {
       setRefresh(!refresh);
     } catch (err) {
       console.error("Update failed:", err.response || err);
-      toast.error(err?.response?.data?.message || "❌ Failed to update employee");
+      toast.error(
+        err?.response?.data?.message || "❌ Failed to update employee"
+      );
     }
   }
 
@@ -219,27 +249,90 @@ export default function EmployeeManagement() {
         <h5>Add New Employee</h5>
         <div className="row g-2 mb-2">
           <div className="col-md-3">
-            <input className="form-control" placeholder="First Name" value={newEmp.firstName} onChange={(e) => setNewEmp({ ...newEmp, firstName: e.target.value })} required />
+            <input
+              className="form-control"
+              placeholder="First Name"
+              value={newEmp.firstName}
+              onChange={(e) =>
+                setNewEmp({ ...newEmp, firstName: e.target.value })
+              }
+              required
+            />
           </div>
           <div className="col-md-3">
-            <input className="form-control" placeholder="Last Name" value={newEmp.lastName} onChange={(e) => setNewEmp({ ...newEmp, lastName: e.target.value })} required />
+            <input
+              className="form-control"
+              placeholder="Last Name"
+              value={newEmp.lastName}
+              onChange={(e) =>
+                setNewEmp({ ...newEmp, lastName: e.target.value })
+              }
+              required
+            />
           </div>
           <div className="col-md-3">
-            <input className="form-control" placeholder="Username" value={newEmp.username} onChange={(e) => setNewEmp({ ...newEmp, username: e.target.value })} required />
+            <input
+              className="form-control"
+              placeholder="Username"
+              value={newEmp.username}
+              onChange={(e) =>
+                setNewEmp({ ...newEmp, username: e.target.value })
+              }
+              required
+            />
           </div>
           <div className="col-md-3">
-            <input className="form-control" type="email" placeholder="Email" value={newEmp.email} onChange={(e) => setNewEmp({ ...newEmp, email: e.target.value })} required />
+            <input
+              className="form-control"
+              type="email"
+              placeholder="Email"
+              value={newEmp.email}
+              onChange={(e) =>
+                setNewEmp({ ...newEmp, email: e.target.value })
+              }
+              required
+            />
           </div>
         </div>
         <div className="row g-2 mb-2">
           <div className="col-md-3">
-            <input className="form-control" type="password" placeholder="Password" value={newEmp.password} onChange={(e) => setNewEmp({ ...newEmp, password: e.target.value })} required />
+            <input
+              className="form-control"
+              type="password"
+              placeholder="Password"
+              value={newEmp.password}
+              onChange={(e) => {
+                const pwd = e.target.value;
+                setNewEmp({ ...newEmp, password: pwd });
+
+                if (!passwordRegex.test(pwd)) {
+                  setPasswordError(
+                    "Password must be at least 8 chars, include uppercase, lowercase, number & special character."
+                  );
+                } else {
+                  setPasswordError("");
+                }
+              }}
+              required
+            />
+            {passwordError && (
+              <small className="text-danger">{passwordError}</small>
+            )}
           </div>
           <div className="col-md-3">
-            <select className="form-select" value={newEmp.department} onChange={(e) => setNewEmp({ ...newEmp, department: e.target.value })} required>
+            <select
+              className="form-select"
+              value={newEmp.department}
+              onChange={(e) =>
+                setNewEmp({ ...newEmp, department: e.target.value })
+              }
+              required
+            >
               <option value="">Select Department</option>
               {departmentOptions.map((dept, idx) => (
-                <option key={idx} value={dept}>{dept}</option>
+                <option key={idx} value={dept}>
+                  {dept}
+                </option>
               ))}
             </select>
           </div>
@@ -259,18 +352,50 @@ export default function EmployeeManagement() {
           <table className="table table-bordered">
             <thead>
               <tr>
-                <th onClick={() => handleSort("code")} style={{ cursor: "pointer" }}>
-                  Code {sortConfig.key === "code" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                <th
+                  onClick={() => handleSort("code")}
+                  style={{ cursor: "pointer" }}
+                >
+                  Code{" "}
+                  {sortConfig.key === "code"
+                    ? sortConfig.direction === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
-                <th onClick={() => handleSort("name")} style={{ cursor: "pointer" }}>
-                  Name {sortConfig.key === "name" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                <th
+                  onClick={() => handleSort("name")}
+                  style={{ cursor: "pointer" }}
+                >
+                  Name{" "}
+                  {sortConfig.key === "name"
+                    ? sortConfig.direction === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
                 <th>Department</th>
-                <th onClick={() => handleSort("email")} style={{ cursor: "pointer" }}>
-                  Email {sortConfig.key === "email" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                <th
+                  onClick={() => handleSort("email")}
+                  style={{ cursor: "pointer" }}
+                >
+                  Email{" "}
+                  {sortConfig.key === "email"
+                    ? sortConfig.direction === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
-                <th onClick={() => handleSort("username")} style={{ cursor: "pointer" }}>
-                  Username {sortConfig.key === "username" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                <th
+                  onClick={() => handleSort("username")}
+                  style={{ cursor: "pointer" }}
+                >
+                  Username{" "}
+                  {sortConfig.key === "username"
+                    ? sortConfig.direction === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
                 <th>Actions</th>
               </tr>
@@ -282,8 +407,26 @@ export default function EmployeeManagement() {
                   <td>
                     {editingId === e.id ? (
                       <>
-                        <input className="form-control mb-1" value={editData.firstName} onChange={(ev) => setEditData({ ...editData, firstName: ev.target.value })} />
-                        <input className="form-control" value={editData.lastName} onChange={(ev) => setEditData({ ...editData, lastName: ev.target.value })} />
+                        <input
+                          className="form-control mb-1"
+                          value={editData.firstName}
+                          onChange={(ev) =>
+                            setEditData({
+                              ...editData,
+                              firstName: ev.target.value,
+                            })
+                          }
+                        />
+                        <input
+                          className="form-control"
+                          value={editData.lastName}
+                          onChange={(ev) =>
+                            setEditData({
+                              ...editData,
+                              lastName: ev.target.value,
+                            })
+                          }
+                        />
                       </>
                     ) : (
                       `${e.firstName} ${e.lastName}`
@@ -291,10 +434,21 @@ export default function EmployeeManagement() {
                   </td>
                   <td>
                     {editingId === e.id ? (
-                      <select className="form-select" value={editData.department} onChange={(ev) => setEditData({ ...editData, department: ev.target.value })}>
+                      <select
+                        className="form-select"
+                        value={editData.department}
+                        onChange={(ev) =>
+                          setEditData({
+                            ...editData,
+                            department: ev.target.value,
+                          })
+                        }
+                      >
                         <option value="">Select Department</option>
                         {departmentOptions.map((dept, idx) => (
-                          <option key={idx} value={dept}>{dept}</option>
+                          <option key={idx} value={dept}>
+                            {dept}
+                          </option>
                         ))}
                       </select>
                     ) : (
@@ -303,7 +457,17 @@ export default function EmployeeManagement() {
                   </td>
                   <td>
                     {editingId === e.id ? (
-                      <input className="form-control" type="email" value={editData.email} onChange={(ev) => setEditData({ ...editData, email: ev.target.value })} />
+                      <input
+                        className="form-control"
+                        type="email"
+                        value={editData.email}
+                        onChange={(ev) =>
+                          setEditData({
+                            ...editData,
+                            email: ev.target.value,
+                          })
+                        }
+                      />
                     ) : (
                       e.user?.email
                     )}
@@ -312,13 +476,33 @@ export default function EmployeeManagement() {
                   <td>
                     {editingId === e.id ? (
                       <>
-                        <button className="btn btn-sm btn-success me-1" onClick={() => handleUpdate(e.id, e.user?.id)}>Save</button>
-                        <button className="btn btn-sm btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
+                        <button
+                          className="btn btn-sm btn-success me-1"
+                          onClick={() => handleUpdate(e.id, e.user?.id)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </button>
                       </>
                     ) : (
                       <>
-                        <button className="btn btn-sm btn-warning me-1" onClick={() => startEdit(e)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(e.id, e.user?.id)}>Delete</button>
+                        <button
+                          className="btn btn-sm btn-warning me-1"
+                          onClick={() => startEdit(e)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(e.id, e.user?.id)}
+                        >
+                          Delete
+                        </button>
                       </>
                     )}
                   </td>
@@ -326,7 +510,9 @@ export default function EmployeeManagement() {
               ))}
               {paginatedEmployees.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="text-center">No employees found</td>
+                  <td colSpan="6" className="text-center">
+                    No employees found
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -337,15 +523,39 @@ export default function EmployeeManagement() {
             <nav>
               <ul className="pagination justify-content-center">
                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => changePage(currentPage - 1)}>Previous</button>
+                  <button
+                    className="page-link"
+                    onClick={() => changePage(currentPage - 1)}
+                  >
+                    Previous
+                  </button>
                 </li>
                 {Array.from({ length: totalPages }, (_, idx) => (
-                  <li key={idx} className={`page-item ${currentPage === idx + 1 ? "active" : ""}`}>
-                    <button className="page-link" onClick={() => changePage(idx + 1)}>{idx + 1}</button>
+                  <li
+                    key={idx}
+                    className={`page-item ${
+                      currentPage === idx + 1 ? "active" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => changePage(idx + 1)}
+                    >
+                      {idx + 1}
+                    </button>
                   </li>
                 ))}
-                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                  <button className="page-link" onClick={() => changePage(currentPage + 1)}>Next</button>
+                <li
+                  className={`page-item ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => changePage(currentPage + 1)}
+                  >
+                    Next
+                  </button>
                 </li>
               </ul>
             </nav>

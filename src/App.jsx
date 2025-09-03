@@ -24,6 +24,9 @@ import "react-toastify/dist/ReactToastify.css";
 import AdminHome from "./pages/AdminHome.jsx";
 import EmployeeHome from "./pages/EmployeeHome.jsx";
 
+// ✅ Import DepartmentManagement
+import DepartmentManagement from "./pages/DepartmentManagement.jsx";
+
 export default function App() {
   return (
     <Router>
@@ -56,6 +59,15 @@ export default function App() {
             element={
               <ProtectedRoute roles={["ROLE_ADMIN"]}>
                 <EmployeeManagement />
+              </ProtectedRoute>
+            }
+          />
+          {/* ✅ New route for Department Management */}
+          <Route
+            path="/admin/departments"
+            element={
+              <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                <DepartmentManagement />
               </ProtectedRoute>
             }
           />
