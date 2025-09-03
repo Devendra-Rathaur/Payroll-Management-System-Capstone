@@ -20,6 +20,10 @@ import LeaveApproval from "./pages/LeaveApproval.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// ✅ New imports for dashboard home pages
+import AdminHome from "./pages/AdminHome.jsx";
+import EmployeeHome from "./pages/EmployeeHome.jsx";
+
 export default function App() {
   return (
     <Router>
@@ -29,7 +33,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Admin */}
+          {/* Admin Dashboard with nested routes */}
           <Route
             path="/admin/dashboard"
             element={
@@ -37,9 +41,16 @@ export default function App() {
                 <AdminDashboard />
               </ProtectedRoute>
             }
-          />
-          <Route path="/admin/salary-management" element={<SalaryManagement />} />
+          >
+            {/* Default landing for admin */}
+            <Route index element={<AdminHome />} />
+          </Route>
 
+          {/* Admin other pages */}
+          <Route
+            path="/admin/salary-management"
+            element={<SalaryManagement />}
+          />
           <Route
             path="/admin/employees"
             element={
@@ -64,8 +75,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/leave-approval"
+            element={
+              <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                <LeaveApproval />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Employee */}
+          {/* Employee Dashboard with nested routes */}
           <Route
             path="/employee/dashboard"
             element={
@@ -73,7 +92,12 @@ export default function App() {
                 <EmployeeDashboard />
               </ProtectedRoute>
             }
-          />
+          >
+            {/* Default landing for employee */}
+            <Route index element={<EmployeeHome />} />
+          </Route>
+
+          {/* Employee other pages */}
           <Route
             path="/employee/profile"
             element={
@@ -106,11 +130,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/leave-approval"
-            element={<ProtectedRoute roles={['ROLE_ADMIN']}><LeaveApproval /></ProtectedRoute>}
-          />
-
 
           {/* Default */}
           <Route index element={<Navigate to="/login" />} />
@@ -118,7 +137,7 @@ export default function App() {
         </Route>
       </Routes>
 
-      {/* ✅ Toast notifications container (always available) */}
+      {/* ✅ Toast notifications container */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
