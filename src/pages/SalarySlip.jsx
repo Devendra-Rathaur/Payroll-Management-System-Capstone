@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import api from "../api/axios";
 import { toast } from "react-toastify";
+import jsPDF from "jspdf";
 
 export default function SalarySlip() {
   const [year, setYear] = useState(new Date().getFullYear());
@@ -13,7 +14,15 @@ export default function SalarySlip() {
     setLoading(true);
     try {
       const res = await api.get(`/payroll/my/${year}/${month}`);
-      setSalarySlip(res.data);
+
+      // Default values
+      const slip = {
+        ...res.data,
+        bonus: res.data?.bonus ?? 0,
+        payDate: res.data?.payDate || res.data?.processedDate || "N/A",
+      };
+
+      setSalarySlip(slip);
       toast.success("✅ Salary slip fetched");
     } catch (err) {
       console.error("Error fetching salary slip:", err.response || err);
@@ -24,6 +33,34 @@ export default function SalarySlip() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // ✅ Download as PDF
+  function downloadPDF() {
+    if (!salarySlip) return;
+
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Salary Slip", 20, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Month: ${month}/${year}`, 20, 35);
+    doc.text(`Pay Date: ${salarySlip.payDate}`, 20, 45);
+
+    let y = 65;
+    const rows = [
+      ["Basic Salary", salarySlip.basicSalary],
+      ["Deductions", salarySlip.deductions],
+      ["Bonus", salarySlip.bonus],
+      ["Net Salary", salarySlip.netSalary],
+    ];
+
+    rows.forEach(([label, value]) => {
+      doc.text(`${label}: ${value}`, 20, y);
+      y += 10;
+    });
+
+    doc.save(`SalarySlip_${month}_${year}.pdf`);
   }
 
   return (
@@ -96,6 +133,11 @@ export default function SalarySlip() {
               </tr>
             </tbody>
           </table>
+
+          {/* ✅ Download PDF button */}
+          <button className="btn btn-success mt-2" onClick={downloadPDF}>
+            Download PDF
+          </button>
         </div>
       )}
     </div>
