@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { logout as doLogout } from "../services/authService";
 
@@ -25,9 +25,21 @@ export function AuthProvider({ children }) {
   const logout = () => {
     doLogout();
     setUser(null);
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    localStorage.removeItem("token");
   };
 
-  const setAuthUser = (u) => setUser(u);
+  const setAuthUser = (u) => {
+    setUser(u);
+    if (u) {
+      localStorage.setItem("username", u.username);
+      localStorage.setItem("role", u.role);
+    } else {
+      localStorage.removeItem("username");
+      localStorage.removeItem("role");
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ user, setAuthUser, logout }}>

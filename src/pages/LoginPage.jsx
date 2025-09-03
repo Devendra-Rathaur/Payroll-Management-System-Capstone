@@ -1,20 +1,29 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { setAuthUser } = useAuth(); // ✅ Import from context
 
   async function handleSubmit(e) {
     e.preventDefault();
     setBusy(true);
     try {
       const user = await login(username, password);
-      if (user.role === "ROLE_ADMIN") navigate("/admin/dashboard");
-      else navigate("/employee/dashboard");
+
+      // ✅ Update AuthContext immediately
+      setAuthUser(user);
+
+      if (user.role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/employee/dashboard");
+      }
     } catch (err) {
       console.error("Login error:", err.response || err);
       alert(err?.response?.data?.message || "Login failed");
